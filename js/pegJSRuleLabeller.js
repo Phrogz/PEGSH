@@ -43,7 +43,7 @@ pegJSRuleLabeller = (function() {
                      " = " +
                      name +
                      ":(" + expression + ")" +
-                     "{ return {n:'"+name+"', v:"+name+"} }";
+                     "{ return {n:'"+name+"', v:maybeFlatten("+name+")} }";
             },
         peg$c5 = void 0,
         peg$c6 = { type: "other", description: "action" },
