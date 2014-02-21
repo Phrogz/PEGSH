@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html><head>
+	<meta charset="utf-8">
+	<title>Online PEG Syntax Highlighter - PEGSH</title>
+	<style type="text/css">
+		html, body { margin:0; padding:0; font-family:sans-serif; overflow:hidden }
+		#peg, #css, #inp, #out { position:fixed }
+		textarea, pre { position:absolute; left:0; width:100%; top:20px; bottom:0; display:block; margin:0; box-sizing:border-box; font-family:monospace; }
+		h1 { margin:0; background:#444; color:#888; padding:10px 15px; line-height:30px; height:30px }
+		h2 { margin:0; font-size:12pt; background:#888; color:#444; padding:5px 15px; line-height:10px; height:10px; }
+		#peg, #css, #inp, #out { width:50% }
+		#peg, #inp { top:50px; bottom:40% }
+		#css, #out { top:60%;  bottom:0 }
+		#peg, #css { left:0   }
+		#inp, #out { left:50% }
+		#inp { bottom:60% }
+		#out { top:40% }
+		pre { overflow:auto }
+		label { position:absolute; top:10px; right:10px }
+	</style>
+</head><body>
+<h1>PEGSH - A Free Online PEG Syntax Highlighter</h1>
+<div id="peg"><h2>PEG</h2><textarea></textarea></div>
+<div id="css"><h2>CSS</h2><textarea></textarea></div>
+<div id="inp"><h2>Raw Code</h2><textarea></textarea></div>
+<div id="out"><h2>Syntax-Highlighted Result</h2><textarea></textarea></div>
+<label>Rebuild? <input type="checkbox" id="rebuild"></label>
+<script type="text/javascript" src="js/peg-0.8.0.js"></script>
+<script type="text/javascript" src="js/pegJSRuleLabeller.js"></script>
+<script type="text/javascript" xsrc="js/pegsh.js">
+	var peg = document.querySelector('#peg textarea'),
+	    css = document.querySelector('#css textarea'),
+	    inp = document.querySelector('#inp textarea'),
+	    out = document.querySelector('#out textarea');
+
+	peg.value = "paragraph = sentence+\n\
+sentence = (word sp)+ word punctuation\n\
+word = [a-zA-Z]+\n\
+sp = ' '\n\
+punctuation = [.!] sp?";
+	css.value = ".A { color:red }\n.B { color:blue }";
+	inp.value = "Hello cats. Goodbye dogs!";
+
+	peg.onchange = peg.oninput =
+	css.onchange = css.oninput = 
+	inp.onchange = inp.oninput = update;
+
+	Object.defineProperty(Array.prototype,'flatten',{
+		value:function(r){
+			if (!r) r=[];
+			for (var i=0;i<this.length; ++i) if (this[i]!=null) this[i].constructor===Array ? this[i].flatten(r) : r.push(this[i]);
+			return r;
+		}
+	});
+
+	function cleanRule(r){
+		return r.flatten().join('').replace(/^\s+|\s+$/g,'');
+	}
+
+	update();
+
+	function update(){
+		// TODO: error handling
+		if (!document.querySelector('#rebuild').checked){
+			try{
+				var annotated = pegJSRuleLabeller.parse(peg.value);
+				console.log(annotated);
+				var parser = PEG.buildParser(annotated);
+				// var parser = PEG.buildParser(peg.value);
+				var result = parser.parse(inp.value);
+				console.log(JSON.stringify(result));
+				out.value = "";
+			}catch(e){
+				out.value  = "offset: "+e.offset+"\n";
+				out.value += "  line: "+e.line+"\n";
+				out.value += "   col: "+e.column+"\n";
+				out.value += "   exp: "+e.expected+"\n";
+				out.value += " found: "+e.found+"\n";
+				out.value += " messg: "+e.message+"\n";
+				console.dir(e);
+			}
+		}else{
+			var source = PEG.buildParser(peg.value,{output:'source'});
+			pegJSRuleLabeller = eval(source);
+		}
+	}
+
+</script>
+</body></html>

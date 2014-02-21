@@ -1,0 +1,209 @@
+grammar = __ rules:rule+ { return rules.join("\n"); }
+
+rule = name:identifier equals expression:expression semicolon? {
+      name = cleanRule(name);
+      expression = cleanRule(expression);
+      return name + " = " + name + ":(" + expression + ")" +
+             "{ return {n:'"+name+"', v:"+name+"} }";
+    }
+
+expression
+  = choice
+
+choice
+  = sequence (slash sequence)*
+
+sequence
+  = labeled* action
+  / labeled*
+
+labeled
+  = identifier colon prefixed
+  / prefixed
+
+prefixed
+  = dollar suffixed 
+  / and action 
+  / and suffixed 
+  / not action 
+  / not suffixed 
+  / suffixed
+
+suffixed
+  = primary question 
+  / primary star 
+  / primary plus 
+  / primary
+
+primary
+  = identifier !(string? equals) 
+  / literal
+  / class
+  / dot 
+  / lparen expression rparen 
+
+/* "Lexical" elements */
+
+action "action"
+  = braced __ 
+
+braced
+  = $("{" (braced / nonBraceCharacters)* "}")
+
+nonBraceCharacters
+  = nonBraceCharacter+
+
+nonBraceCharacter
+  = [^{}]
+
+equals    = "=" __ 
+colon     = ":" __ 
+semicolon = ";" __ 
+slash     = "/" __ 
+and       = "&" __ 
+not       = "!" __ 
+dollar    = "$" __ 
+question  = "?" __ 
+star      = "*" __ 
+plus      = "+" __ 
+lparen    = "(" __ 
+rparen    = ")" __ 
+dot       = "." __ 
+
+/*
+ * Modeled after ECMA-262, 5th ed., 7.6, but much simplified:
+ *
+ * * no Unicode escape sequences
+ *
+ * * "Unicode combining marks" and "Unicode connection punctuation" can't be
+ *   part of the identifier
+ *
+ * * only [a-zA-Z] is considered a "Unicode letter"
+ *
+ * * only [0-9] is considered a "Unicode digit"
+ *
+ * The simplifications were made just to make the implementation little bit
+ * easier, there is no "philosophical" reason behind them.
+ *
+ * Contrary to ECMA 262, the "$" character is not valid because it serves other
+ * purpose in the grammar.
+ */
+identifier "identifier"
+  = $((letter / "_") (letter / digit / "_")*) __ 
+
+/*
+ * Modeled after ECMA-262, 5th ed., 7.8.4. (syntax & semantics, rules only
+ * vaguely).
+ */
+literal "literal"
+  = (doubleQuotedString / singleQuotedString) "i"? __ 
+
+string "string"
+  = (doubleQuotedString / singleQuotedString) __
+
+doubleQuotedString
+  = '"' doubleQuotedCharacter* '"'
+
+doubleQuotedCharacter
+  = simpleDoubleQuotedCharacter
+  / simpleEscapeSequence
+  / zeroEscapeSequence
+  / hexEscapeSequence
+  / unicodeEscapeSequence
+  / eolEscapeSequence
+
+simpleDoubleQuotedCharacter
+  = !('"' / "\\" / eolChar) . 
+
+singleQuotedString
+  = "'" singleQuotedCharacter* "'" 
+
+singleQuotedCharacter
+  = simpleSingleQuotedCharacter
+  / simpleEscapeSequence
+  / zeroEscapeSequence
+  / hexEscapeSequence
+  / unicodeEscapeSequence
+  / eolEscapeSequence
+
+simpleSingleQuotedCharacter
+  = !("'" / "\\" / eolChar) . 
+
+class "character class"
+  = "[" "^"? (classCharacterRange / classCharacter)* "]" "i"? __ 
+
+classCharacterRange
+  = classCharacter "-" classCharacter
+
+classCharacter
+  = bracketDelimitedCharacter 
+
+bracketDelimitedCharacter
+  = simpleBracketDelimitedCharacter
+  / simpleEscapeSequence
+  / zeroEscapeSequence
+  / hexEscapeSequence
+  / unicodeEscapeSequence
+  / eolEscapeSequence
+
+simpleBracketDelimitedCharacter
+  = !("]" / "\\" / eolChar) . 
+
+simpleEscapeSequence
+  = "\\" !(digit / "x" / "u" / eolChar) . 
+
+zeroEscapeSequence
+  = "\\0" !digit 
+
+hexEscapeSequence
+  = "\\x" $(hexDigit hexDigit) 
+
+unicodeEscapeSequence
+  = "\\u" $(hexDigit hexDigit hexDigit hexDigit) 
+
+eolEscapeSequence
+  = "\\" eol 
+
+digit
+  = [0-9]
+
+hexDigit
+  = [0-9a-fA-F]
+
+letter
+  = lowerCaseLetter
+  / upperCaseLetter
+
+lowerCaseLetter
+  = [a-z]
+
+upperCaseLetter
+  = [A-Z]
+
+__ = (whitespace / eol / comment)*
+
+/* Modeled after ECMA-262, 5th ed., 7.4. */
+comment "comment"
+  = singleLineComment
+  / multiLineComment
+
+singleLineComment
+  = "//" (!eolChar .)*
+
+multiLineComment
+  = "/*" (!"*/" .)* "*/"
+
+/* Modeled after ECMA-262, 5th ed., 7.3. */
+eol "end of line"
+  = "\n"
+  / "\r\n"
+  / "\r"
+  / "\u2028"
+  / "\u2029"
+
+eolChar
+  = [\n\r\u2028\u2029]
+
+/* Modeled after ECMA-262, 5th ed., 7.2. */
+whitespace "whitespace"
+  = [ \t\v\f\u00A0\uFEFF\u1680\u180E\u2000-\u200A\u202F\u205F\u3000]
