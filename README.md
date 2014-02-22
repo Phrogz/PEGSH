@@ -2,8 +2,7 @@
 
 PEGSH (pronounced…well, like it's spelled) is a web application that lets you develop and test a parsing expression grammar ("PEG") interactively. Type your grammar, and type your input, and it will create an HTML markup of your input with `<span class="rulename">…</span>` wrapped around it. There's also an area to enter CSS rules that control the coloring and other styles of the result.
 
-[![Screenshot of PEGSH](http://phrogz.net/js/pegsh/screenshot.jpg)](http://phrogz.net/js/pegsh/)
-{: style="display:block; margin:1em auto"}
+[![Screenshot of PEGSH](https://raw.github.com/Phrogz/PEGSH/master/screenshot.jpg)](http://phrogz.net/js/pegsh/)
 
 All of this happens as you type, with PEG syntax errors or parsing errors letting you know what's going on.
 
