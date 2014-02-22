@@ -2,116 +2,34 @@
 <html><head>
 	<meta charset="utf-8">
 	<title>Online PEG Syntax Highlighter - PEGSH</title>
-	<style type="text/css">
-		html, body { margin:0; padding:0; font-family:sans-serif; overflow:hidden }
-		#peg, #css, #inp, #out { position:fixed }
-		textarea, pre { position:absolute; left:0; width:100%; top:20px; bottom:0; display:block; margin:0; box-sizing:border-box; font-family:monospace; }
-		h1 { margin:0; background:#444; color:#888; padding:10px 5px; line-height:30px; height:30px }
-		h2 { margin:0; font-size:12pt; background:#888; color:#444; padding:5px; line-height:10px; height:10px; }
-		#peg, #css, #inp, #out { width:50% }
-		#peg, #inp { top:50px; bottom:40% }
-		#css, #out { top:60%;  bottom:0 }
-		#peg, #css { left:0   }
-		#inp, #out { left:50% }
-		#inp { bottom:60% }
-		#out { top:40% }
-		pre { overflow:auto }
-		label { position:absolute; top:10px; right:10px }
-	</style>
+	<link rel="stylesheet" type="text/css" href="pegsh.css">
+	<style type="text/css" id="custom"></style>
 </head><body>
 <h1>PEGSH - A Free Online PEG Syntax Highlighter</h1>
-<div id="peg"><h2>PEG</h2><textarea></textarea></div>
-<div id="css"><h2>CSS</h2><textarea></textarea></div>
-<div id="inp"><h2>Raw Code</h2><textarea></textarea></div>
-<div id="out"><h2>Syntax-Highlighted Result</h2><textarea></textarea></div>
-<label>Rebuild? <input type="checkbox" id="rebuild"></label>
-<script type="text/javascript" src="js/peg-0.8.0.js"></script>
-<script type="text/javascript" src="js/pegJSRuleLabeller.js"></script>
-<script type="text/javascript" xsrc="js/pegsh.js">
-	var peg = document.querySelector('#peg textarea'),
-	    css = document.querySelector('#css textarea'),
-	    inp = document.querySelector('#inp textarea'),
-	    out = document.querySelector('#out textarea');
+<div id="peg"><h2>PEG <span>(the parsing expression grammar)</span></h2>
+<div class="wrapper"><textarea>paragraph = sentence+
+sentence = (word sp)+ word punctuation sp?
+word = [a-zA-Z]+
+sp = ' '
+punctuation = [.!]</textarea></div></div>
 
-	peg.value = "paragraph = sentence+\n\
-sentence = (word sp)+ word punctuation sp?\n\
-word = [a-zA-Z]+\n\
-sp = ' '\n\
-punctuation = [.!]";
-	css.value = ".word { color:red }\n.punctuation { color:blue }\n.sp {background:yellow}";
-	inp.value = "Hello cats. Goodbye dogs!";
+<div id="css"><h2>CSS <span>(each peg rule is a css class)</span></h2>
+<div class="wrapper"><textarea>
+#output { background:#eee }
+.paragraph { display:block; padding:3px; border:1px solid blue }
+.sentence { border:1px solid rgba(0,180,0,0.5) }
+.word { color:red }
+.punctuation { color:blue }
+.sp { background:rgba(255,255,0,0.5) }</textarea></div></div>
 
-	peg.onchange = peg.oninput =
-	css.onchange = css.oninput = 
-	inp.onchange = inp.oninput = update;
+<div id="inp"><h2>Raw Input <span>(the stuff to parse)</span></h2>
+<div class="wrapper"><textarea>Hello cats. Goodbye dogs!</textarea></div></div>
+<div id="out"><h2>Syntax-Highlighted Result <span>(or maybe error messages)</span></h2>
+<div class="wrapper"><pre id="output"></pre></div></div>
 
-	Object.defineProperty(Array.prototype,'flatten',{
-		value:function(r){
-			for (var a=this,i=0,r=r||[];i<a.length; ++i)
-				if (a[i]!=null)
-					a[i] instanceof Array ? a[i].flatten(r) : r.push(a[i]);
-			return r;
-		}
-	});
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="peg-0.8.0.js"></script>
+<script type="text/javascript" src="pegsh.js"></script>
 
-	function cleanRule(r){
-		return r.flatten().join('').replace(/^\s+|\s+$/g,'');
-	}
-
-	function maybeFlatten(o) {
-		o = compact(o);
-		return isArraysOfStrings(o) ? o.flatten().join('') : o;
-	}
-
-	function isArraysOfStrings(a) {
-		if (a instanceof Array){
-			for(var i=a.length;i--;){
-				if (a[i] instanceof Array){
-					if (!isArraysOfStrings(a[i])) return false;
-				}else if (typeof a[i] !== 'string') return false;
-			}
-			return true;
-		}
-	}
-
-	function compact(a){
-		if (a instanceof Array){
-			for(var i=a.length;i--;){
-				if (a[i] == null) a.splice(i,1);
-				else if (typeof a[i] === 'object') compact(a[i]);
-			}
-		}else if (a instanceof Object){
-			for(var k in a) if (a[k]==null) delete a[k];
-		}
-		return a;
-	}
-
-	update();
-
-	function update(){
-		// TODO: error handling
-		if (!document.querySelector('#rebuild').checked){
-			try{
-				var annotated = pegJSRuleLabeller.parse(peg.value);
-				console.log(annotated);
-				var parser = PEG.buildParser(annotated);
-				// var parser = PEG.buildParser(peg.value);
-				var result = parser.parse(inp.value);
-				out.value = JSON.stringify(result);
-			}catch(e){
-				out.value  = "offset: "+e.offset+"\n";
-				out.value += "  line: "+e.line+"\n";
-				out.value += "   col: "+e.column+"\n";
-				out.value += "   exp: "+JSON.stringify(e.expected)+"\n";
-				out.value += " found: "+e.found+"\n";
-				out.value += " messg: "+e.message+"\n";
-				console.dir(e);
-			}
-		}else{
-			var source = PEG.buildParser(peg.value,{output:'source'});
-			pegJSRuleLabeller = eval(source);
-		}
-	}
-
-</script>
+<footer>Copyright ©2014 <a href="http://phrogz.net/">Gavin Kistner</a></footer>
 </body></html>

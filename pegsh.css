@@ -1,0 +1,20 @@
+html, body { margin:0; padding:0; font-family:sans-serif; overflow:hidden }
+.wrapper { position:absolute; left:0; right:0; top:20px; bottom:0 }
+textarea, pre { display:block; width:100%; height:100%; margin:0; box-sizing:border-box; font-family:monospace; padding:5px; font-size:12pt }
+h1 { margin:0; background:#444; color:#888; padding:10px 5px; line-height:20px; height:20px; font-size:18pt }
+h2 { margin:0; font-size:12pt; background:#888; color:#444; padding:5px; line-height:10px; height:10px }
+#peg, #css, #inp, #out { position:fixed; width:50% }
+#peg, #inp { top:40px; bottom:40% }
+#css, #out { top:60%;  bottom:0 }
+#peg, #css { left:0   }
+#inp, #out { left:50% }
+#inp { bottom:60%; border-left:1px solid #444 }
+#out { top:40% }
+pre#output { overflow:auto; white-space:pre }
+textarea { background:#181818; color:#cde; border:0 }
+textarea:focus { background:#151528;}
+h2 span { font-weight:normal; font-size:80%; opacity:0.8 }
+#output div.error { color:#c00; background:#ff9; font-weight:bold; font-size:150% }
+footer { position:absolute; top:0; right:5px; line-height:40px; color:#fff; opacity:0.6; font-size:10pt }
+footer a { color:#fff }
+footer:hover { opacity:0.8 }

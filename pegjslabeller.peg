@@ -4,7 +4,7 @@ rule = name:identifier equals expression:expression semicolon? {
       name = cleanRule(name);
       expression = cleanRule(expression);
       return name + " = " + name + ":(" + expression + ")" +
-             "{ return {n:'"+name+"', v:"+name+"} }";
+             "{ return {n:'"+name+"', v:maybeFlatten("+name+")} }";
     }
 
 expression
