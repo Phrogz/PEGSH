@@ -49,7 +49,10 @@ function handleWorkerResponse(evt) {
 function htmlFrom(node){
 	if (node instanceof Array){
 		return node.map(htmlFrom).join('');		
-	}else{
+	}else
+	if (typeof node === 'string'){
+		return node;
+	} else {
 		var html = ['<span class="'+node.n+'">'];
 		if (node.v instanceof Array){
 			html.push(node.v.map(htmlFrom).join(''));
