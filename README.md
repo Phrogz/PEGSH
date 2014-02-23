@@ -15,7 +15,6 @@ PEGSH is available online at [http://phrogz.net/js/pegsh/](http://phrogz.net/js/
 * There's no way to save or load your work currently. If you're making a good PEG, be sure to copy/paste it somewhere else occasionally.
 * The PEG and CSS editors don't have any pretty syntax highlighting themselves.
 * When there's an error parsing your input, you get line and column indications…but there are no line numbers in the text input, and no nice highlighting of the input to show where the problem occurred.
-* There's no help available from the page itself telling you what sort of PEG syntax is supported. (It's [PEG.js][1], with a minor variation.)
 
 
 ## Credit & Contact
