@@ -1,50 +1,59 @@
-Object.defineProperty(Array.prototype,'flatten',{
-	value:function(r){
-		for (var a=this,i=0,r=r||[];i<a.length; ++i)
-			if (a[i]!=null)
-				a[i] instanceof Array ? a[i].flatten(r) : r.push(a[i]);
-		return r;
-	}
-});
+var peg = document.querySelector('#peg textarea'),
+    css = document.querySelector('#css textarea'),
+    inp = document.querySelector('#inp textarea'),
+    out = document.querySelector('#out pre'),
+    customCSS = document.querySelector('#custom');
 
-var $peg = $('#peg textarea'),
-    $css = $('#css textarea'),
-    $inp = $('#inp textarea'),
-    $out = $('#out pre');
+var worker, queuedCommands;
+killWorker();
 
-var pegJSRuleLabeller,inputParser;
-$.get('pegjslabeller.peg',function(peg){
-	pegJSRuleLabeller = PEG.buildParser(peg);
-	updateCSS();
-	compileParser();
-},'text');
+updateCSS();
 
-$peg.bind('change input',compileParser);
-$css.bind('change input',updateCSS);
-$inp.bind('change input',parseInput);
+peg.addEventListener('change',delayedParse,false);
+peg.addEventListener('input', delayedParse,false);
+inp.addEventListener('change',delayedParse,false);
+inp.addEventListener('input', delayedParse,false);
+css.addEventListener('change',updateCSS,   false);
+css.addEventListener('input', updateCSS,   false);
 
-function compileParser(){
-	try{
-		var annotatingPEG = pegJSRuleLabeller.parse($peg.val());
-		inputParser       = PEG.buildParser(annotatingPEG);
-		parseInput();
-	}catch(e){ logError(e,'Error Compiling PEG') }
+var userTypingTimer;
+function delayedParse() {
+	clearTimeout(userTypingTimer);
+	userTypingTimer = setTimeout(parseInput,200);
 }
 
+var deathRowTimer;
 function parseInput(){
-	try{
-		var tree = inputParser.parse($inp.val());
-		$out.html(htmlFrom(tree));
-	}catch(e){ logError(e,'Error Parsing Input') }
+	queuedCommands++;
+	clearTimeout(deathRowTimer);
+	deathRowTimer = setTimeout(killWorker,2000);
+	worker.postMessage({ command:'parseInput', peg:peg.value, input:inp.value });
+}
+
+function killWorker() {
+	out.innerHTML = "…parser stalled handling your input; something is bad…"
+	if (worker) worker.terminate();
+	clearTimeout(deathRowTimer);
+	worker = new Worker('parser.js');
+	worker.addEventListener('message',handleWorkerResponse,false);
+	queuedCommands = 0;
+	delayedParse(); // Try again?
+}
+
+function handleWorkerResponse(evt) {
+	if (!--queuedCommands) clearTimeout(deathRowTimer);
+	var data = evt.data;
+	if (data.error) logError(data.error,data.details);
+	else            out.innerHTML = htmlFrom(data.parseTree);
 }
 
 function htmlFrom(node){
 	if (node instanceof Array){
-		return $.map(node,htmlFrom).join('');		
+		return node.map(htmlFrom).join('');		
 	}else{
 		var html = ['<span class="'+node.n+'">'];
 		if (node.v instanceof Array){
-			html.push($.map(node.v,htmlFrom).join(''));
+			html.push(node.v.map(htmlFrom).join(''));
 		}else if (typeof node.v == 'string'){
 			html.push(node.v);
 		}
@@ -54,49 +63,26 @@ function htmlFrom(node){
 }
 
 function updateCSS(){
-	$('#custom').html($css.val());
+	customCSS.innerHTML = css.value;
 }
 
-function cleanRule(r){
-	return r.flatten().join('').replace(/^\s+|\s+$/g,'');
-}
-
-function maybeFlatten(o) {
-	o = compact(o);
-	return isArraysOfStrings(o) ? o.flatten().join('') : o;
-}
-
-function isArraysOfStrings(a) {
-	if (a instanceof Array){
-		for(var i=a.length;i--;){
-			if (a[i] instanceof Array){
-				if (!isArraysOfStrings(a[i])) return false;
-			}else if (typeof a[i] !== 'string') return false;
-		}
-		return true;
+function logError(label,e){
+	var messages = ["<div class='error'>"+label+"</div>"];
+	if (e){
+		if (e.summary)  messages.push(e.summary);
+		if (e.line)     messages.push("    line: "+e.line);
+		if (e.column)   messages.push("  column: "+e.column);
+		if (e.offset)   messages.push("  offset: "+e.offset);
+		// if (e.expected) messages.push("expected: "+e.expected.map(JSON.stringify).join("\n"));
+		// if (e.found)    messages.push("   found: "+e.found);
+		// if (e.message)  messages.push(" message: "+e.message);
 	}
+	out.innerHTML = messages.join('\n');
 }
 
-function compact(a){
-	if (a instanceof Array){
-		for(var i=a.length;i--;){
-			if (a[i] == null) a.splice(i,1);
-			else if (typeof a[i] === 'object') compact(a[i]);
-		}
-	}else if (a instanceof Object){
-		for(var k in a) if (a[k]==null) delete a[k];
+function bootstrap(){
+	if (validParser===undefined){
+		compileParser();
+		setTimeout(bootstrap,500);
 	}
-	return a;
-}
-
-function logError(e,scope){
-	var messages = ["<div class='error'>"+scope+"</div>",e];
-	if (e.line)     messages.push("    line: "+e.line);
-	if (e.column)   messages.push("  column: "+e.column);
-	if (e.offset)   messages.push("  offset: "+e.offset);
-	// if (e.expected) messages.push("expected: "+$.map(e.expected,JSON.stringify).join("\n"));
-	// if (e.found)    messages.push("   found: "+e.found);
-	// if (e.message)  messages.push(" message: "+e.message);
-	$out.html(messages.join('\n'));
-	// console.dir(e);
 }

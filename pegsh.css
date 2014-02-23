@@ -11,7 +11,7 @@ h2 { margin:0; font-size:12pt; background:#888; color:#444; padding:5px; line-he
 #inp { bottom:60%; border-left:1px solid #444 }
 #out { top:40% }
 pre#output { overflow:auto; white-space:pre }
-textarea { background:#181818; color:#cde; border:0 }
+textarea { background:#181818; color:#cde; border:0; tab-size:2; -o-tab-size:2; -moz-tab-size:2; }
 textarea:focus { background:#151528;}
 h2 span { font-weight:normal; font-size:80%; opacity:0.8 }
 #output div.error { color:#c00; background:#ff9; font-weight:bold; font-size:150% }
