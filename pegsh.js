@@ -31,9 +31,8 @@ function parseInput(){
 }
 
 function killWorker() {
-	out.innerHTML = "…parser stalled handling your input; something is bad…"
+	out.innerHTML = "…parser stalled processing the input; something is bad…"
 	if (worker) worker.terminate();
-	clearTimeout(deathRowTimer);
 	worker = new Worker('parser.js');
 	worker.addEventListener('message',handleWorkerResponse,false);
 	queuedCommands = 0;
