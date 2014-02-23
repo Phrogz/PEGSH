@@ -46,21 +46,21 @@ function handleWorkerResponse(evt) {
 	else            out.innerHTML = htmlFrom(data.parseTree);
 }
 
-function htmlFrom(node){
-	if (node instanceof Array){
-		return node.map(htmlFrom).join('');		
-	}else{
-		var html = ['<span class="'+node.n+'">'];
-		if (node.v instanceof Array){
-			html.push(node.v.map(htmlFrom).join(''));
-		}else if (typeof node.v == 'string'){
-			html.push(node.v);
-		}
-		html.push('</span>');
-		return html.join('');
+function isNode(node) {return typeof(node.v)!=='undefined' && typeof(node.n)!=='undefined';}
+function htmlFrom(node) {
+	if (node instanceof Array) {
+		return node.map(htmlFrom).join('');
+	} else
+	if (isNode(node)) {
+		return [
+			'<span class="'+node.n+'">',
+			htmlFrom(node.v),
+			'</span>',
+		].join('');
+	} else {
+		return node;
 	}
 }
-
 function updateCSS(){
 	customCSS.innerHTML = css.value;
 }
