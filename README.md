@@ -135,20 +135,19 @@ punc      = [.!]
 ~~~~
 
 …then the parse tree result becomes far simpler:
+
 ~~~~ html
 <pre id="output">
 	<span class="paragraph">
 		<span class="sentence">
-			<span class="word">Hello</span>·<span class="word">cats</span><span class="punctuation">.</span>·
+			<span class="word">Hello</span> <span class="word">cats</span><span class="punctuation">.</span> 
 		</span>
 		<span class="sentence">
-			<span class="word">Goodbye</span>·<span class="word">dogs</span><span class="punctuation">!</span>
+			<span class="word">Goodbye</span> <span class="word">dogs</span><span class="punctuation">!</span>
 		</span>
 	</span>
 </pre>
 ~~~~
-
-_In the above, the `·` character represents a literal space character in the output._
 
 ## Known Limitations (aka TODO)
 * There's no way to save or load your work currently. If you're making a good PEG, be sure to copy/paste it somewhere else occasionally.
