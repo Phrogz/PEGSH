@@ -31,8 +31,10 @@ function parseInput(){
 }
 
 function killWorker() {
-	out.innerHTML = "…parser stalled processing the input; something is bad…"
-	if (worker) worker.terminate();
+	if (worker){
+		worker.terminate();
+		out.innerHTML = "…parser stalled processing the input; something is bad…"
+	}
 	worker = new Worker('parser.js');
 	worker.addEventListener('message',handleWorkerResponse,false);
 	queuedCommands = 0;
@@ -49,15 +51,10 @@ function handleWorkerResponse(evt) {
 function htmlFrom(node){
 	if (node instanceof Array){
 		return node.map(htmlFrom).join('');		
+	}else if (node && node.n){
+		return '<span class="'+node.n+'">'+htmlFrom(node.v)+'</span>';
 	}else{
-		var html = ['<span class="'+node.n+'">'];
-		if (node.v instanceof Array){
-			html.push(node.v.map(htmlFrom).join(''));
-		}else if (typeof node.v == 'string'){
-			html.push(node.v);
-		}
-		html.push('</span>');
-		return html.join('');
+		return node || "";
 	}
 }
 
