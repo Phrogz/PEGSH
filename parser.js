@@ -16,8 +16,11 @@ self.addEventListener('message',function(evt){
 
 function generateParser(){
 	var annotatingPEG, parser;
-	try{ annotatingPEG = pegJSRuleLabeller.parse(userPEG)                             }
-	catch(e){ self.postMessage({error:'Error Compiling PEG',details:errorDetails(e)}) }
+	try{
+		PEG.buildParser(userPEG); // Do this just to get an error if there's a problem with the original PEG
+		annotatingPEG = pegJSRuleLabeller.parse(userPEG);
+	}
+	catch(e){ self.postMessage({error:'Error Compiling PEG',details:errorDetails(e)}); }
 	if (annotatingPEG){
 		try{      parser = PEG.buildParser(annotatingPEG)                                            }
 		catch(e){ self.postMessage({error:'Error Compiling Annotating PEG',details:errorDetails(e)}) }
