@@ -6,9 +6,66 @@ PEGSH (pronounced…well, like it's spelled) is a web application that lets you 
 
 All of this happens as you type, with PEG syntax errors or parsing errors letting you know what's going on.
 
-
-## Try it Online
 PEGSH is available online at [http://phrogz.net/js/pegsh/](http://phrogz.net/js/pegsh/).
+
+## Documentation
+
+### Writing Grammars
+
+The syntax for writing a PEG grammar is that of [PEG.js][1]. Read the PEG.js documentation for [syntax details](http://pegjs.majda.cz/documentation#grammar-syntax-and-semantics), but note the following modification:
+
+Any grammar you write is automatically modified to provide rule details. For example, if you write this simple PEG grammar…
+
+~~~
+paragraph = sentence+
+sentence  = (word sp)+ word punc sp?
+word      = [a-zA-Z]+
+sp        = ' '
+punc      = [.!]
+~~~
+
+…it is internally converted into this PEG.js grammar—that labels the results of each rule and uses parser actions to annotate the matched text with the rule name—before parsing your input:
+
+~~~
+paragraph = paragraph_pEgSh:(sentence+)               { …some important javascript… }
+sentence  = sentence_pEgSh:((word sp)+ word punc sp?) { …some important javascript… }
+word      = word_pEgSh:([a-zA-Z]+)                    { …some important javascript… }
+sp        = sp_pEgSh:(' ')                            { …some important javascript… }
+punc      = punc_pEgSh:([.!])                         { …some important javascript… }
+~~~
+
+If you attempt to add your own parser action at a high level…
+
+~~~
+sentence = (word sp)+ word punc sp? { return 'sentence' }
+~~~
+
+…it will be converted into something that gets rid of parse tree information below that node:
+
+~~~
+sentence = sentence_pEgSh:((word sp)+ word punc sp? { return 'sentence' }) { …pegsh js… }
+~~~
+
+### Styling the Parse Tree
+
+The results of successfully parsing your input will be a hierarchical pile of HTML `<span>` elements with CSS classes applied based on the rule that matched. For example, using the grammar above to parse `Hello cats. Goodbye dogs!` will produce this HTML:
+
+~~~~ html
+<pre id="output"><span class="paragraph"><span class="sentence"><span class="word">Hello</span><span class="sp"> </span><span class="word">cats</span><span class="punctuation">.</span><span class="sp"> </span></span><span class="sentence"><span class="word">Goodbye</span><span class="sp"> </span><span class="word">dogs</span><span class="punctuation">!</span></span></span></pre>
+~~~~
+
+If you change the grammar to use rule-based letter matching…
+
+~~~~
+word   = letter+
+letter = [a-z]i
+~~~~
+
+…then you get this more verbose parse tree:
+
+~~~~ html
+<pre id="output"><span class="paragraph"><span class="sentence"><span class="word"><span class="letter">H</span><span class="letter">e</span><span class="letter">l</span><span class="letter">l</span><span class="letter">o</span></span><span class="sp"> </span><span class="word"><span class="letter">c</span><span class="letter">a</span><span class="letter">t</span><span class="letter">s</span></span><span class="punctuation">.</span><span class="sp"> </span></span><span class="sentence"><span class="word"><span class="letter">G</span><span class="letter">o</span><span class="letter">o</span><span class="letter">d</span><span class="letter">b</span><span class="letter">y</span><span class="letter">e</span></span><span class="sp"> </span><span class="word"><span class="letter">d</span><span class="letter">o</span><span class="letter">g</span><span class="letter">s</span></span><span class="punctuation">!</span></span></span></pre>
+~~~~
 
 
 ## Known Limitations (aka TODO)
