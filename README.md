@@ -48,10 +48,26 @@ sentence = sentence_pEgSh:((word sp)+ word punc sp? { return 'sentence' }) { …
 
 ### Styling the Parse Tree
 
-The results of successfully parsing your input will be a hierarchical pile of HTML `<span>` elements with CSS classes applied based on the rule that matched. For example, using the grammar above to parse `Hello cats. Goodbye dogs!` will produce this HTML:
+The results of successfully parsing your input will be a hierarchical pile of HTML `<span>` elements with CSS classes applied based on the rule that matched. For example, using the grammar above to parse `Hello cats. Goodbye dogs!` will produce this HTML (all on one line):
 
 ~~~~ html
-<pre id="output"><span class="paragraph"><span class="sentence"><span class="word">Hello</span><span class="sp"> </span><span class="word">cats</span><span class="punctuation">.</span><span class="sp"> </span></span><span class="sentence"><span class="word">Goodbye</span><span class="sp"> </span><span class="word">dogs</span><span class="punctuation">!</span></span></span></pre>
+<pre id="output">
+	<span class="paragraph">
+		<span class="sentence">
+			<span class="word">Hello</span>
+			<span class="sp"> </span>
+			<span class="word">cats</span>
+			<span class="punc">.</span>
+			<span class="sp"> </span>
+		</span>
+		<span class="sentence">
+			<span class="word">Goodbye</span>
+			<span class="sp"> </span>
+			<span class="word">dogs</span>
+			<span class="punc">!</span>
+		</span>
+	</span>
+</pre>
 ~~~~
 
 If you change the grammar to use rule-based letter matching…
@@ -61,10 +77,50 @@ word   = letter+
 letter = [a-z]i
 ~~~~
 
-…then you get this more verbose parse tree:
+…then you get this more verbose parse tree (again, all on one line):
 
 ~~~~ html
-<pre id="output"><span class="paragraph"><span class="sentence"><span class="word"><span class="letter">H</span><span class="letter">e</span><span class="letter">l</span><span class="letter">l</span><span class="letter">o</span></span><span class="sp"> </span><span class="word"><span class="letter">c</span><span class="letter">a</span><span class="letter">t</span><span class="letter">s</span></span><span class="punctuation">.</span><span class="sp"> </span></span><span class="sentence"><span class="word"><span class="letter">G</span><span class="letter">o</span><span class="letter">o</span><span class="letter">d</span><span class="letter">b</span><span class="letter">y</span><span class="letter">e</span></span><span class="sp"> </span><span class="word"><span class="letter">d</span><span class="letter">o</span><span class="letter">g</span><span class="letter">s</span></span><span class="punctuation">!</span></span></span></pre>
+<pre id="output">
+	<span class="paragraph">
+		<span class="sentence">
+			<span class="word">
+				<span class="letter">H</span>
+				<span class="letter">e</span>
+				<span class="letter">l</span>
+				<span class="letter">l</span>
+				<span class="letter">o</span>
+			</span>
+			<span class="sp"> </span>
+			<span class="word">
+				<span class="letter">c</span>
+				<span class="letter">a</span>
+				<span class="letter">t</span>
+				<span class="letter">s</span>
+			</span>
+			<span class="punc">.</span>
+			<span class="sp"> </span>
+		</span>
+		<span class="sentence">
+			<span class="word">
+				<span class="letter">G</span>
+				<span class="letter">o</span>
+				<span class="letter">o</span>
+				<span class="letter">d</span>
+				<span class="letter">b</span>
+				<span class="letter">y</span>
+				<span class="letter">e</span>
+			</span>
+			<span class="sp"> </span>
+			<span class="word">
+				<span class="letter">d</span>
+				<span class="letter">o</span>
+				<span class="letter">g</span>
+				<span class="letter">s</span>
+			</span>
+			<span class="punc">!</span>
+		</span>
+	</span>
+</pre>
 ~~~~
 
 
