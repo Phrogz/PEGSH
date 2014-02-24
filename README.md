@@ -1,4 +1,4 @@
-# PEGSH - Parsing Expression Grammar Syntax Highlighter
+# PEG Syntax Highlighter
 
 PEGSH (pronounced…well, like it's spelled) is a web application that lets you develop and test a parsing expression grammar ("PEG") interactively. Type your grammar, and type your input, and it will create an HTML markup of your input with `<span class="rulename">…</span>` wrapped around it. There's also an area to enter CSS rules that control the coloring and other styles of the result.
 
@@ -51,23 +51,21 @@ sentence = sentence_pEgSh:((word sp)+ word punc sp? { return 'sentence' }) { …
 The results of successfully parsing your input will be a hierarchical pile of HTML `<span>` elements with CSS classes applied based on the rule that matched. For example, using the grammar above to parse `Hello cats. Goodbye dogs!` will produce this HTML (all on one line):
 
 ~~~~ html
-<pre id="output">
-	<span class="paragraph">
-		<span class="sentence">
-			<span class="word">Hello</span>
-			<span class="sp"> </span>
-			<span class="word">cats</span>
-			<span class="punc">.</span>
-			<span class="sp"> </span>
-		</span>
-		<span class="sentence">
-			<span class="word">Goodbye</span>
-			<span class="sp"> </span>
-			<span class="word">dogs</span>
-			<span class="punc">!</span>
-		</span>
+<span class="paragraph">
+	<span class="sentence">
+		<span class="word">Hello</span>
+		<span class="sp"> </span>
+		<span class="word">cats</span>
+		<span class="punc">.</span>
+		<span class="sp"> </span>
 	</span>
-</pre>
+	<span class="sentence">
+		<span class="word">Goodbye</span>
+		<span class="sp"> </span>
+		<span class="word">dogs</span>
+		<span class="punc">!</span>
+	</span>
+</span>
 ~~~~
 
 If you change the grammar to use rule-based letter matching…
@@ -80,50 +78,50 @@ letter = [a-z]i
 …then you get this more verbose parse tree (again, all on one line):
 
 ~~~~ html
-<pre id="output">
-	<span class="paragraph">
-		<span class="sentence">
-			<span class="word">
-				<span class="letter">H</span>
-				<span class="letter">e</span>
-				<span class="letter">l</span>
-				<span class="letter">l</span>
-				<span class="letter">o</span>
-			</span>
-			<span class="sp"> </span>
-			<span class="word">
-				<span class="letter">c</span>
-				<span class="letter">a</span>
-				<span class="letter">t</span>
-				<span class="letter">s</span>
-			</span>
-			<span class="punc">.</span>
-			<span class="sp"> </span>
+<span class="paragraph">
+	<span class="sentence">
+		<span class="word">
+			<span class="letter">H</span>
+			<span class="letter">e</span>
+			<span class="letter">l</span>
+			<span class="letter">l</span>
+			<span class="letter">o</span>
 		</span>
-		<span class="sentence">
-			<span class="word">
-				<span class="letter">G</span>
-				<span class="letter">o</span>
-				<span class="letter">o</span>
-				<span class="letter">d</span>
-				<span class="letter">b</span>
-				<span class="letter">y</span>
-				<span class="letter">e</span>
-			</span>
-			<span class="sp"> </span>
-			<span class="word">
-				<span class="letter">d</span>
-				<span class="letter">o</span>
-				<span class="letter">g</span>
-				<span class="letter">s</span>
-			</span>
-			<span class="punc">!</span>
+		<span class="sp"> </span>
+		<span class="word">
+			<span class="letter">c</span>
+			<span class="letter">a</span>
+			<span class="letter">t</span>
+			<span class="letter">s</span>
 		</span>
+		<span class="punc">.</span>
+		<span class="sp"> </span>
 	</span>
-</pre>
+	<span class="sentence">
+		<span class="word">
+			<span class="letter">G</span>
+			<span class="letter">o</span>
+			<span class="letter">o</span>
+			<span class="letter">d</span>
+			<span class="letter">b</span>
+			<span class="letter">y</span>
+			<span class="letter">e</span>
+		</span>
+		<span class="sp"> </span>
+		<span class="word">
+			<span class="letter">d</span>
+			<span class="letter">o</span>
+			<span class="letter">g</span>
+			<span class="letter">s</span>
+		</span>
+		<span class="punc">!</span>
+	</span>
+</span>
 ~~~~
 
-To avoid this noise and slight perf hit, any rule that you name with a leading underscore will not generate a unique entry in the parse tree. For example, if we change our grammar to this…
+#### Simplifying the Output
+
+To avoid the noise and slight perf hit that adding extra rules results in, any rule that you name with a leading underscore will not generate its own `<span>` in the parse tree. For example, if we change our grammar to this…
 
 ~~~~
 paragraph = sentence+
@@ -137,17 +135,32 @@ punc      = [.!]
 …then the parse tree result becomes far simpler:
 
 ~~~~ html
-<pre id="output">
-	<span class="paragraph">
-		<span class="sentence">
-			<span class="word">Hello</span> <span class="word">cats</span><span class="punctuation">.</span> 
-		</span>
-		<span class="sentence">
-			<span class="word">Goodbye</span> <span class="word">dogs</span><span class="punctuation">!</span>
-		</span>
+<span class="paragraph">
+	<span class="sentence">
+		<span class="word">Hello</span> <span class="word">cats</span><span class="punctuation">.</span> 
 	</span>
-</pre>
+	<span class="sentence">
+		<span class="word">Goodbye</span> <span class="word">dogs</span><span class="punctuation">!</span>
+	</span>
+</span>
 ~~~~
+
+Note, however, that the underscore does not 'silence' child rules. For example, this grammar…
+
+~~~~
+animal    = _dogORcat !.
+_dogORcat = canine / feline
+canine    = 'dog' / 'wolf'
+feline    = 'cat' / 'lion'
+~~~~
+
+produces this output:
+
+~~~~ html
+<span class="animal"><span class="feline">cat</span></span>
+~~~~
+
+_If you do not want the `canine` or `feline` wrappers, then you need to name those rules with underscores, also._
 
 ## Known Limitations (aka TODO)
 * There's no way to save or load your work currently. If you're making a good PEG, be sure to copy/paste it somewhere else occasionally.
