@@ -1,62 +1,66 @@
 grammar = __ rules:rule+ { return rules.join("\n"); }
 
 rule =
-  name:identifier displayName:string? equals expression:expression semicolon? {
-    name = cleanRule(name);
-    expression = cleanRule(expression);
-    return name + (displayName ? " "+cleanRule(displayName) : "") + " = "
-           + name + "_pEgSh:(" + expression + ")"
-           + "{ return {n:'"+name+"', v:maybeFlatten("+name+"_pEgSh)} }";
-  }
+	name:identifier displayName:string? equals expression:expression semicolon? {
+		name = cleanRule(name);
+		expression = cleanRule(expression);
+		return name + (displayName ? " "+cleanRule(displayName) : "") + " = "
+					 + name + "_pEgSh:(" + expression + ")"
+					 + (
+					 	name[0]==='_' ?
+					 		"{ return maybeFlatten("+name+"_pEgSh) }" : 
+					 		"{ return {n:'"+name+"', v:maybeFlatten("+name+"_pEgSh)} }"
+					 );
+	}
 
 expression
-  = choice
+	= choice
 
 choice
-  = sequence (slash sequence)*
+	= sequence (slash sequence)*
 
 sequence
-  = labeled* action
-  / labeled*
+	= labeled* action
+	/ labeled*
 
 labeled
-  = identifier colon prefixed
-  / prefixed
+	= identifier colon prefixed
+	/ prefixed
 
 prefixed
-  = dollar suffixed 
-  / and action 
-  / and suffixed 
-  / not action 
-  / not suffixed 
-  / suffixed
+	= dollar suffixed 
+	/ and action 
+	/ and suffixed 
+	/ not action 
+	/ not suffixed 
+	/ suffixed
 
 suffixed
-  = primary question 
-  / primary star 
-  / primary plus 
-  / primary
+	= primary question 
+	/ primary star 
+	/ primary plus 
+	/ primary
 
 primary
-  = identifier !(string? equals) 
-  / literal
-  / class
-  / dot 
-  / lparen expression rparen 
+	= identifier !(string? equals) 
+	/ literal
+	/ class
+	/ dot 
+	/ lparen expression rparen 
 
 /* "Lexical" elements */
 
 action "action"
-  = braced __ 
+	= braced __ 
 
 braced
-  = $("{" (braced / nonBraceCharacters)* "}")
+	= $("{" (braced / nonBraceCharacters)* "}")
 
 nonBraceCharacters
-  = nonBraceCharacter+
+	= nonBraceCharacter+
 
 nonBraceCharacter
-  = [^{}]
+	= [^{}]
 
 equals    = "=" __ 
 colon     = ":" __ 
@@ -91,121 +95,121 @@ dot       = "." __
  * purpose in the grammar.
  */
 identifier "identifier"
-  = $((letter / "_") (letter / digit / "_")*) __ 
+	= $((letter / "_") (letter / digit / "_")*) __ 
 
 /*
  * Modeled after ECMA-262, 5th ed., 7.8.4. (syntax & semantics, rules only
  * vaguely).
  */
 literal "literal"
-  = (doubleQuotedString / singleQuotedString) "i"? __ 
+	= (doubleQuotedString / singleQuotedString) "i"? __ 
 
 string "string"
-  = (doubleQuotedString / singleQuotedString) __
+	= (doubleQuotedString / singleQuotedString) __
 
 doubleQuotedString
-  = '"' doubleQuotedCharacter* '"'
+	= '"' doubleQuotedCharacter* '"'
 
 doubleQuotedCharacter
-  = simpleDoubleQuotedCharacter
-  / simpleEscapeSequence
-  / zeroEscapeSequence
-  / hexEscapeSequence
-  / unicodeEscapeSequence
-  / eolEscapeSequence
+	= simpleDoubleQuotedCharacter
+	/ simpleEscapeSequence
+	/ zeroEscapeSequence
+	/ hexEscapeSequence
+	/ unicodeEscapeSequence
+	/ eolEscapeSequence
 
 simpleDoubleQuotedCharacter
-  = !('"' / "\\" / eolChar) . 
+	= !('"' / "\\" / eolChar) . 
 
 singleQuotedString
-  = "'" singleQuotedCharacter* "'" 
+	= "'" singleQuotedCharacter* "'" 
 
 singleQuotedCharacter
-  = simpleSingleQuotedCharacter
-  / simpleEscapeSequence
-  / zeroEscapeSequence
-  / hexEscapeSequence
-  / unicodeEscapeSequence
-  / eolEscapeSequence
+	= simpleSingleQuotedCharacter
+	/ simpleEscapeSequence
+	/ zeroEscapeSequence
+	/ hexEscapeSequence
+	/ unicodeEscapeSequence
+	/ eolEscapeSequence
 
 simpleSingleQuotedCharacter
-  = !("'" / "\\" / eolChar) . 
+	= !("'" / "\\" / eolChar) . 
 
 class "character class"
-  = "[" "^"? (classCharacterRange / classCharacter)* "]" "i"? __ 
+	= "[" "^"? (classCharacterRange / classCharacter)* "]" "i"? __ 
 
 classCharacterRange
-  = classCharacter "-" classCharacter
+	= classCharacter "-" classCharacter
 
 classCharacter
-  = bracketDelimitedCharacter 
+	= bracketDelimitedCharacter 
 
 bracketDelimitedCharacter
-  = simpleBracketDelimitedCharacter
-  / simpleEscapeSequence
-  / zeroEscapeSequence
-  / hexEscapeSequence
-  / unicodeEscapeSequence
-  / eolEscapeSequence
+	= simpleBracketDelimitedCharacter
+	/ simpleEscapeSequence
+	/ zeroEscapeSequence
+	/ hexEscapeSequence
+	/ unicodeEscapeSequence
+	/ eolEscapeSequence
 
 simpleBracketDelimitedCharacter
-  = !("]" / "\\" / eolChar) . 
+	= !("]" / "\\" / eolChar) . 
 
 simpleEscapeSequence
-  = "\\" !(digit / "x" / "u" / eolChar) . 
+	= "\\" !(digit / "x" / "u" / eolChar) . 
 
 zeroEscapeSequence
-  = "\\0" !digit 
+	= "\\0" !digit 
 
 hexEscapeSequence
-  = "\\x" $(hexDigit hexDigit) 
+	= "\\x" $(hexDigit hexDigit) 
 
 unicodeEscapeSequence
-  = "\\u" $(hexDigit hexDigit hexDigit hexDigit) 
+	= "\\u" $(hexDigit hexDigit hexDigit hexDigit) 
 
 eolEscapeSequence
-  = "\\" eol 
+	= "\\" eol 
 
 digit
-  = [0-9]
+	= [0-9]
 
 hexDigit
-  = [0-9a-fA-F]
+	= [0-9a-fA-F]
 
 letter
-  = lowerCaseLetter
-  / upperCaseLetter
+	= lowerCaseLetter
+	/ upperCaseLetter
 
 lowerCaseLetter
-  = [a-z]
+	= [a-z]
 
 upperCaseLetter
-  = [A-Z]
+	= [A-Z]
 
 __ = (whitespace / eol / comment)*
 
 /* Modeled after ECMA-262, 5th ed., 7.4. */
 comment "comment"
-  = singleLineComment
-  / multiLineComment
+	= singleLineComment
+	/ multiLineComment
 
 singleLineComment
-  = "//" (!eolChar .)*
+	= "//" (!eolChar .)*
 
 multiLineComment
-  = "/*" (!"*/" .)* "*/"
+	= "/*" (!"*/" .)* "*/"
 
 /* Modeled after ECMA-262, 5th ed., 7.3. */
 eol "end of line"
-  = "\n"
-  / "\r\n"
-  / "\r"
-  / "\u2028"
-  / "\u2029"
+	= "\n"
+	/ "\r\n"
+	/ "\r"
+	/ "\u2028"
+	/ "\u2029"
 
 eolChar
-  = [\n\r\u2028\u2029]
+	= [\n\r\u2028\u2029]
 
 /* Modeled after ECMA-262, 5th ed., 7.2. */
 whitespace "whitespace"
-  = [ \t\v\f\u00A0\uFEFF\u1680\u180E\u2000-\u200A\u202F\u205F\u3000]
+	= [ \t\v\f\u00A0\uFEFF\u1680\u180E\u2000-\u200A\u202F\u205F\u3000]
