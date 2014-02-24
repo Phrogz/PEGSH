@@ -5,8 +5,8 @@ rule =
     name = cleanRule(name);
     expression = cleanRule(expression);
     return name + (displayName ? " "+cleanRule(displayName) : "") + " = "
-           + name + ":(" + expression + ")"
-           + "{ return {n:'"+name+"', v:maybeFlatten("+name+")} }";
+           + name + "_pEgSh:(" + expression + ")"
+           + "{ return {n:'"+name+"', v:maybeFlatten("+name+"_pEgSh)} }";
   }
 
 expression
