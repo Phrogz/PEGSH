@@ -7,14 +7,14 @@
 </head><body>
 <h1>PEGSH - A Free Online PEG Syntax Highlighter <span> <a href="https://github.com/Phrogz/PEGSH/blob/master/README.md#documentation" target="GitHub">docs</a> <a href="http://github.com/Phrogz/PEGSH" target="GitHub">code</a></span></h1>
 <div id="peg"><h2>PEG <span>(the <a href="http://pegjs.majda.cz/documentation#grammar-syntax-and-semantics" target="peg_grammar" title="Open PEG Syntax in a new window">parsing expression grammar</a>)</span></h2>
-<div class="wrapper"><textarea>paragraph = sentence+
+<div class="wrapper"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">paragraph = sentence+
 sentence = (word sp)+ word punctuation sp?
 word = [a-zA-Z]+
 sp = ' '
 punctuation = [.!]</textarea></div></div>
 
 <div id="css"><h2>CSS <span>(each peg rule is a css class)</span></h2>
-<div class="wrapper"><textarea>
+<div class="wrapper"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
 #output { background:#eee }
 .paragraph { display:block; padding:3px; border:1px solid blue }
 .sentence { border:1px solid rgba(0,180,0,0.5) }
@@ -23,7 +23,7 @@ punctuation = [.!]</textarea></div></div>
 .sp { background:rgba(255,255,0,0.5) }</textarea></div></div>
 
 <div id="inp"><h2>Raw Input <span>(the stuff to parse)</span></h2>
-<div class="wrapper"><textarea wrap="off">Hello cats. Goodbye dogs!</textarea></div></div>
+<div class="wrapper"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" wrap="off">Hello cats. Goodbye dogs!</textarea></div></div>
 <div id="out"><h2>Syntax-Highlighted Result <span>(or maybe error messages)</span></h2>
 <div class="wrapper"><pre id="output"></pre></div></div>
 
@@ -31,5 +31,5 @@ punctuation = [.!]</textarea></div></div>
 <script type="text/javascript" src="lib/utils.js"></script>
 <script type="text/javascript" src="pegsh.js"></script>
 
-<footer>Copyright ©2014 <a href="http://phrogz.net/">Gavin Kistner</a></footer>
+<footer>Copyright ©2014-2018 <a href="http://phrogz.net/">Gavin Kistner</a></footer>
 </body></html>
